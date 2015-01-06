@@ -1,0 +1,27 @@
+{
+    "timezone": "Europe/Zaporozhye",
+    "privateIp": "172.16.1.10",
+    "containers": {
+        "apachePhpNode": {
+            "enabled": true,
+            "dockerfilePath": "/vagrant/dockerfiles/apache_php_node",
+            "imageName": "bahek/apache_php_node",
+            "runArgs": "-v /vagrant/app:/app",
+            "defaultPort": 80
+        },
+        "mysql": {
+            "enabled": true,
+            "dockerfilePath": "/vagrant/dockerfiles/mysql",
+            "imageName": "bahek/mysql",
+            "runArgs": "",
+            "defaultPort": 3306
+        },
+        "memcached": {
+            "enabled": true,
+            "dockerfilePath": "/vagrant/dockerfiles/memcached",
+            "imageName": "bahek/memcached",
+            "runArgs": "",
+            "defaultPort": 11211
+        }
+    }
+}

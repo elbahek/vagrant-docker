@@ -1,0 +1,62 @@
+# TODO: set timezone in docker containers
+# TODO: docker ports php -> 3306, 11211
+# TODO: add nginx container
+# TODO: add mysql-proxy container
+# TODO: setup php.ini
+# TODO: setup apache
+# TODO: env
+
+require 'json'
+
+serverConfig = JSON.parse(File.read(File.expand_path "./vagrant-config.json"))
+
+Vagrant.configure(2) do |config|
+    # docker-friendly ubuntu
+    config.vm.box = "phusion/ubuntu-14.04-amd64"
+
+    # networking
+    config.vm.network "private_network", ip: serverConfig["privateIp"]
+
+    # set timezone
+    if Dir.glob("#{File.dirname(__FILE__)}/.vagrant/machines/default/*/id").empty?
+        setTimeCmd = "echo '"+ serverConfig["timezone"] +"' | sudo tee /etc/timezone && dpkg-reconfigure --frontend noninteractive tzdata"
+        config.vm.provision "setTime", type: "shell", inline: setTimeCmd, run: "once"
+    end
+
+    # auto-upgrade system on every start
+    updateCmd = "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get --assume-yes -o Dpkg::Options::=\"--force-confdef\" -o Dpkg::Options::=\"--force-confold\" dist-upgrade"
+    config.vm.provision "update", type: "shell", inline: updateCmd, run: "always"
+
+    if Dir.glob("#{File.dirname(__FILE__)}/.vagrant/machines/default/*/id").empty?
+        # install docker
+        installDockerCmd = "wget -q -O - https://get.docker.io/gpg | apt-key add - && "\
+            "echo deb http://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list && "\
+            "apt-get update -qq && "\
+            "apt-get install --assume-yes --force-yes lxc-docker && "\
+            "usermod -a -G docker vagrant"
+        config.vm.provision "installDocker", type: "shell", inline: installDockerCmd, run: "once"
+
+        # install other
+        installOtherCmd = "apt-get install --assume-yes mc bash-completion && "\
+            "echo \"SELECTED_EDITOR=/usr/bin/mcedit\" > /home/vagrant/.selected_editor"
+        config.vm.provision "installOther", type: "shell", inline: installOtherCmd, run: "once"
+    end
+
+    # building dockerfiles
+    serverConfig["containers"].each do |container|
+        if container[1]["enabled"]
+            config.vm.provision "docker" do |d|
+                d.build_image container[1]["dockerfilePath"], args: "-t \""+ container[1]["imageName"] +"\""
+            end
+        end
+    end
+
+    # running dockerfiles
+    serverConfig["containers"].each do |container|
+        if container[1]["enabled"]
+            config.vm.provision "docker" do |d|
+                d.run container[1]["imageName"], args: "-p %d:%d %s" % [container[1]["defaultPort"], container[1]["defaultPort"], container[1]["runArgs"]], daemonize: true
+            end
+        end
+    end
+end

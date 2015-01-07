@@ -8,3 +8,8 @@ RUN apt-get --assume-yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::
 # install support packages
 RUN apt-get --assume-yes install mc bash-completion wget
 RUN echo "SELECTED_EDITOR=/usr/bin/mcedit" > /root/.selected_editor
+
+# configure
+RUN rm /run.sh
+ADD ./run.sh /run.sh
+RUN chmod 755 /run.sh

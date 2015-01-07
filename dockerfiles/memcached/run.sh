@@ -7,8 +7,9 @@ if [ -n "$TIMEZONE" ] && [ -f /etc/timezone ] && [ "$TIMEZONE" != $(cat /etc/tim
     echo $TIMEZONE | tee /etc/timezone
 fi
 
-sed -i 's/APACHE_RUN_USER=www-data/APACHE_RUN_USER='$RUN_USER_NAME'/' /etc/apache2/envvars
-sed -i 's/APACHE_RUN_GROUP=www-data/APACHE_RUN_GROUP='$RUN_USER_NAME'/' /etc/apache2/envvars
+#create admin account to memcached using SASL
+if [ ! -f /.memcached_admin_created ]; then
+    /create_memcached_admin_user.sh
+fi
 
-source /etc/apache2/envvars
-exec apache2 -D FOREGROUND
+memcached -u root -S  -l 0.0.0.0

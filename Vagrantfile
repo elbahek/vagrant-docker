@@ -1,10 +1,12 @@
-# TODO: set timezone in docker containers
+# TODO: set timezone in docker containers ++
 # TODO: docker ports php -> 3306, 11211
 # TODO: add nginx container
 # TODO: add mysql-proxy container
 # TODO: setup php.ini
 # TODO: setup apache
-# TODO: env
+# TODO: env for apache container ++
+# TODO: mount for apache container ++
+# TODO: access host -> vagrant -> docker
 
 require 'json'
 
@@ -55,7 +57,12 @@ Vagrant.configure(2) do |config|
     serverConfig["containers"].each do |container|
         if container[1]["enabled"]
             config.vm.provision "docker" do |d|
-                d.run container[1]["imageName"], args: "-p %d:%d %s" % [container[1]["defaultPort"], container[1]["defaultPort"], container[1]["runArgs"]], daemonize: true
+                runArgs = "-p %d:%d %s -e TIMEZONE='%s'" % [container[1]["hostPort"], container[1]["containerPort"], container[1]["runArgs"], serverConfig["timezone"]]
+                if container[0] == "apachePhpNode"
+                    runArgs += " -e RUN_USER_UID=%d -e RUN_USER_GID=%d -e RUN_USER_NAME=%s" % [container[1]["runUserUid"], container[1]["runUserGid"], container[1]["runUserName"]]
+                    runArgs += " -v /vagrant/app:/app"
+                end
+                d.run container[1]["imageName"], args: runArgs, daemonize: true
             end
         end
     end

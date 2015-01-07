@@ -17,10 +17,10 @@ RUN npm install -g gulp grunt-cli bower
 # swap apache user
 RUN groupadd --non-unique --gid 1000 developer
 RUN useradd --non-unique --uid 1000 --gid 1000 --shell /bin/bash developer
-RUN sed -i 's/APACHE_RUN_USER=www-data/APACHE_RUN_USER='developer'/' /etc/apache2/envvars
-RUN sed -i 's/APACHE_RUN_GROUP=www-data/APACHE_RUN_GROUP='developer'/' /etc/apache2/envvars
 
 # configure
 RUN rm -rf /app /run.sh
 ADD ./run.sh /run.sh
 RUN chmod 755 /run.sh
+#COPY ./php.ini /etc/php5/apache2/php.ini
+#RUN chmod 644 /etc/php5/apache2/php.ini

@@ -1,14 +1,19 @@
 # TODO: set timezone in docker containers ++
-# TODO: docker ports php -> 3306, 11211
+# TODO: docker ports php -> 3306, 11211 ++
 # TODO: add nginx container
 # TODO: add mysql-proxy container
-# TODO: setup php.ini
-# TODO: setup apache
+# TODO: setup php.ini ++
+# TODO: install php-memcached ++
+# TODO: setup apache ++
+# TODO: static ips for countainers --
+# TODO: put apache logs to project dir ++
+# TODO: put mysql logs to project dir ++
 # TODO: env for apache container ++
 # TODO: mount for apache container ++
-# TODO: access host -> vagrant -> docker
+# TODO: access host -> vagrant -> docker ++
 
 require 'json'
+require 'fileutils'
 
 serverConfig = JSON.parse(File.read(File.expand_path "./vagrant-config.json"))
 
@@ -48,7 +53,7 @@ Vagrant.configure(2) do |config|
     serverConfig["containers"].each do |container|
         if container[1]["enabled"]
             config.vm.provision "docker" do |d|
-                d.build_image container[1]["dockerfilePath"], args: "-t \""+ container[1]["imageName"] +"\""
+                d.build_image container[1]["dockerfilePath"], args: "-t \"%s\"" % [container[1]["imageName"]]
             end
         end
     end
@@ -57,12 +62,13 @@ Vagrant.configure(2) do |config|
     serverConfig["containers"].each do |container|
         if container[1]["enabled"]
             config.vm.provision "docker" do |d|
-                runArgs = "-p %d:%d %s -e TIMEZONE='%s'" % [container[1]["hostPort"], container[1]["containerPort"], container[1]["runArgs"], serverConfig["timezone"]]
+                runArgs = " --name='%s' -p %d:%d -e TIMEZONE='%s' " % [container[0], container[1]["hostPort"], container[1]["containerPort"], serverConfig["timezone"]]
                 if container[0] == "apachePhpNode"
-                    runArgs += " -e RUN_USER_UID=%d -e RUN_USER_GID=%d -e RUN_USER_NAME=%s" % [container[1]["runUserUid"], container[1]["runUserGid"], container[1]["runUserName"]]
-                    runArgs += " -v /vagrant/app:/app"
+                    runArgs += container[1]["runArgs"] % [container[1]["runUserUid"], container[1]["runUserGid"], container[1]["runUserName"]]
+                else
+                    runArgs += container[1]["runArgs"]
                 end
-                d.run container[1]["imageName"], args: runArgs, daemonize: true
+                d.run container[1]["imageName"], args: runArgs, auto_assign_name: false, daemonize: true
             end
         end
     end

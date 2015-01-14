@@ -7,9 +7,6 @@ if [ -n "$TIMEZONE" ] && [ -f /etc/timezone ] && [ "$TIMEZONE" != $(cat /etc/tim
     echo $TIMEZONE | tee /etc/timezone
 fi
 
-#create admin account to memcached using SASL
-if [ ! -f /.memcached_admin_created ]; then
-    /create_memcached_admin_user.sh
-fi
-
-memcached -u root  -l 0.0.0.0
+#exec mysql-proxy --keepalive --daemon --plugins=proxy \
+#    --log-level=debug --log-file=/var/log/mysql_proxy/mysql_proxy.log \
+#    --proxy-backend-addresses=172.16.1.10:$MYSQL_DEFAULT_PORT --proxy-lua-script=/root/reporter.lua

@@ -62,7 +62,7 @@ Vagrant.configure(2) do |config|
     serverConfig["containers"].each do |container|
         if container[1]["enabled"]
             config.vm.provision "docker" do |d|
-                runArgs = " --name='%s' -p %d:%d -e TIMEZONE='%s' " % [container[0], container[1]["hostPort"], container[1]["containerPort"], serverConfig["timezone"]]
+                runArgs = " --name='%s' -p %d:%d -e TIMEZONE='%s' -e HOST_IP='%s' " % [container[0], container[1]["hostPort"], container[1]["containerPort"], serverConfig["timezone"], serverConfig["privateIp"]]
                 if container[0] == "apachePhpNode"
                     runArgs += container[1]["runArgs"] % [container[1]["runUserUid"], container[1]["runUserGid"], container[1]["runUserName"]]
                 else

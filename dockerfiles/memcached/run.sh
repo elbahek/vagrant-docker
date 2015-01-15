@@ -1,10 +1,10 @@
 #!/bin/bash
 
 if [ -n "$TIMEZONE" ] && [ ! -f /etc/timezone ]; then
-    echo $TIMEZONE | tee /etc/timezone
+    echo $TIMEZONE | tee /etc/timezone && dpkg-reconfigure --frontend noninteractive tzdata
 fi
 if [ -n "$TIMEZONE" ] && [ -f /etc/timezone ] && [ "$TIMEZONE" != $(cat /etc/timezone) ]; then
-    echo $TIMEZONE | tee /etc/timezone
+    echo $TIMEZONE | tee /etc/timezone && dpkg-reconfigure --frontend noninteractive tzdata
 fi
 
 #create admin account to memcached using SASL

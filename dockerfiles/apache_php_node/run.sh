@@ -1,10 +1,10 @@
 #!/bin/bash
 
 if [ -n "$TIMEZONE" ] && [ ! -f /etc/timezone ]; then
-    echo $TIMEZONE | tee /etc/timezone
+    echo $TIMEZONE | tee /etc/timezone && dpkg-reconfigure --frontend noninteractive tzdata
 fi
 if [ -n "$TIMEZONE" ] && [ -f /etc/timezone ] && [ "$TIMEZONE" != $(cat /etc/timezone) ]; then
-    echo $TIMEZONE | tee /etc/timezone
+    echo $TIMEZONE | tee /etc/timezone && dpkg-reconfigure --frontend noninteractive tzdata
 fi
 
 sed -i 's/APACHE_RUN_USER=www-data/APACHE_RUN_USER='$RUN_USER_NAME'/' /etc/apache2/envvars

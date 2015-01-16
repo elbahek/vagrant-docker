@@ -22,7 +22,7 @@ Vagrant.configure(2) do |config|
     config.vm.box = "phusion/ubuntu-14.04-amd64"
 
     # networking
-    config.vm.network "private_network", ip: serverConfig["privateIp"]
+    config.vm.network "private_network", ip: serverConfig["vagrantIp"]
 
     # set timezone
     if Dir.glob("#{File.dirname(__FILE__)}/.vagrant/machines/default/*/id").empty?
@@ -62,7 +62,7 @@ Vagrant.configure(2) do |config|
     serverConfig["containers"].each do |container|
         if container[1]["enabled"]
             config.vm.provision "docker" do |d|
-                runArgs = " --name='%s' -p %d:%d -e TIMEZONE='%s' -e HOST_IP='%s' " % [container[0], container[1]["hostPort"], container[1]["containerPort"], serverConfig["timezone"], serverConfig["privateIp"]]
+                runArgs = " --name='%s' -p %d:%d -e TIMEZONE='%s' -e VAGRANT_IP='%s' -e DEVELOPER_IP='%s' " % [container[0], container[1]["hostPort"], container[1]["containerPort"], serverConfig["timezone"], serverConfig["vagrantIp"], serverConfig["developerIp"]]
                 if container[0] == "apachePhpNode"
                     runArgs += container[1]["runArgs"] % [container[1]["runUserUid"], container[1]["runUserGid"], container[1]["runUserName"]]
                 else

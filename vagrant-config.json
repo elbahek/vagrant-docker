@@ -1,6 +1,7 @@
 {
     "timezone": "Europe/Zaporozhye",
-    "privateIp": "172.16.1.10",
+    "developerIp": "172.16.1.1",
+    "vagrantIp": "172.16.1.10",
     "containers": {
         "mysql": {
             "enabled": true,

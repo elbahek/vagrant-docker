@@ -1,4 +1,5 @@
 FROM tutum/memcached
+ENV TERM xterm
 
 # update all
 RUN apt-get update

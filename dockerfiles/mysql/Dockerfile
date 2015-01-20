@@ -1,4 +1,5 @@
 FROM tutum/mysql
+ENV TERM xterm
 
 # update all
 RUN apt-get update

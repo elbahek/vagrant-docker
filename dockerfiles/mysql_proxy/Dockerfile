@@ -1,4 +1,5 @@
 FROM ubuntu:trusty
+ENV TERM xterm
 
 # update all
 RUN apt-get update

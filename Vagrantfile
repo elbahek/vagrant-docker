@@ -1,7 +1,7 @@
 # TODO: set timezone in docker containers ++
 # TODO: docker ports php -> 3306, 11211 ++
 # TODO: add nginx container
-# TODO: add mysql-proxy container
+# TODO: add mysql-proxy container ++
 # TODO: setup php.ini ++
 # TODO: install php-memcached ++
 # TODO: setup apache ++
@@ -47,6 +47,10 @@ Vagrant.configure(2) do |config|
         installOtherCmd = "apt-get install --assume-yes mc bash-completion && "\
             "echo \"SELECTED_EDITOR=/usr/bin/mcedit\" > /home/vagrant/.selected_editor"
         config.vm.provision "installOther", type: "shell", inline: installOtherCmd, run: "once"
+        
+        # adding bash aliases to enter docker containers
+        createBashAliasesCmd = "cp /vagrant/.bash_aliases /home/vagrant/.bash_aliases"
+        config.vm.provision "createBashAliases", type: "shell", inline: createBashAliasesCmd, run: "once"
     end
 
     # building dockerfiles

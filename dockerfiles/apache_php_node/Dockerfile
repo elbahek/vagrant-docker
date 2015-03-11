@@ -18,7 +18,7 @@ RUN echo "SELECTED_EDITOR=/usr/bin/mcedit" > /root/.selected_editor
 RUN echo "SELECTED_EDITOR=/usr/bin/mcedit" > /home/developer/.selected_editor
 
 # install additional apache modules
-RUN apt-get --assume-yes install mcrypt php5-dev php5-intl php5-json php5-mcrypt php5-memcached php5-sasl php5-sqlite php5-xdebug php5-xmlrpc php5-xsl
+RUN apt-get --assume-yes install mcrypt php5-dev php5-intl php5-json php5-mcrypt php5-memcache php5-memcached php5-sasl php5-sqlite php5-xdebug php5-xmlrpc php5-xsl
 RUN a2enmod rewrite
 RUN php5enmod mcrypt
 WORKDIR /root

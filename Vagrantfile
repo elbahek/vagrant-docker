@@ -1,16 +1,5 @@
-# TODO: set timezone in docker containers ++
-# TODO: docker ports php -> 3306, 11211 ++
-# TODO: add nginx container
-# TODO: add mysql-proxy container ++
-# TODO: setup php.ini ++
-# TODO: install php-memcached ++
-# TODO: setup apache ++
+# TODO: add nginx container --
 # TODO: static ips for countainers --
-# TODO: put apache logs to project dir ++
-# TODO: put mysql logs to project dir ++
-# TODO: env for apache container ++
-# TODO: mount for apache container ++
-# TODO: access host -> vagrant -> docker ++
 
 require 'json'
 require 'fileutils'
@@ -47,17 +36,46 @@ Vagrant.configure(2) do |config|
         installOtherCmd = "apt-get install --assume-yes mc bash-completion && "\
             "echo \"SELECTED_EDITOR=/usr/bin/mcedit\" > /home/vagrant/.selected_editor"
         config.vm.provision "installOther", type: "shell", inline: installOtherCmd, run: "once"
-        
-        # adding bash aliases to enter docker containers
-        createBashAliasesCmd = "cp /vagrant/.bash_aliases /home/vagrant/.bash_aliases"
-        config.vm.provision "createBashAliases", type: "shell", inline: createBashAliasesCmd, run: "once"
+    end
+
+    # generate .bash_aliases based on enabled dockers
+    text = ""
+    serverConfig["containers"].each do |container|
+        if container[1]["enabled"]
+            if container[0] == "apachePhpNode"
+                text += "alias enter-%s=\"docker exec -t -i apachePhpNode sudo -iu %s\"\n" % [container[0], container[1]["runUserName"]]
+            else
+                text += "alias enter-%s=\"docker exec -t -i apachePhpNode /bin/bash\"\n" % [container[0]]
+            end
+        end
+    end
+    File.open("#{File.dirname(__FILE__)}/.bash_aliases", "w").puts(text)
+    createBashAliasesCmd = "cp /vagrant/.bash_aliases /home/vagrant/.bash_aliases"
+    config.vm.provision "createBashAliases", type: "shell", inline: createBashAliasesCmd, run: "once"
+
+
+    # generating dockerfiles from templates
+    serverConfig["containers"].each do |container|
+        if container[1]["enabled"]
+            text = File.open("#{File.dirname(__FILE__)}/#{container[1]["dockerfilePath"]}/Dockerfile.template", "r").read
+            placeholders = text.scan(/(?:%).+?(?:%)/).flatten.uniq
+            placeholders.each do |placeholder|
+                replacement = placeholder.gsub("%", "")
+                replacement = replacement.gsub(".", "\"][\"")
+                replacement = "serverConfig[\"#{replacement}\"]"
+                replacement = eval(replacement)
+                replacement = "#{replacement}"
+                text.gsub!(placeholder, replacement)
+            end
+            File.open("#{File.dirname(__FILE__)}/#{container[1]["dockerfilePath"]}/Dockerfile", "w").puts(text)
+        end
     end
 
     # building dockerfiles
     serverConfig["containers"].each do |container|
         if container[1]["enabled"]
             config.vm.provision "docker" do |d|
-                d.build_image container[1]["dockerfilePath"], args: "-t \"%s\"" % [container[1]["imageName"]]
+                d.build_image "/vagrant/#{container[1]["dockerfilePath"]}", args: "-t \"%s\"" % [container[1]["imageName"]]
             end
         end
     end
@@ -66,12 +84,8 @@ Vagrant.configure(2) do |config|
     serverConfig["containers"].each do |container|
         if container[1]["enabled"]
             config.vm.provision "docker" do |d|
-                runArgs = " --name='%s' -p %d:%d -e TIMEZONE='%s' -e VAGRANT_IP='%s' -e DEVELOPER_IP='%s' " % [container[0], container[1]["hostPort"], container[1]["containerPort"], serverConfig["timezone"], serverConfig["vagrantIp"], serverConfig["developerIp"]]
-                if container[0] == "apachePhpNode"
-                    runArgs += container[1]["runArgs"] % [container[1]["runUserUid"], container[1]["runUserGid"], container[1]["runUserName"]]
-                else
-                    runArgs += container[1]["runArgs"]
-                end
+                runArgs = " --name='%s' -p %d:%d " % [container[0], container[1]["hostPort"], container[1]["containerPort"]]
+                runArgs += container[1]["runArgs"]
                 d.run container[1]["imageName"], args: runArgs, auto_assign_name: false, daemonize: true
             end
         end

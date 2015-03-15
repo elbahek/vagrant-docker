@@ -1,3 +1,5 @@
 /.vagrant
 /app/*
 /app/!index.php
+/.bash_aliases
+Dockerfile

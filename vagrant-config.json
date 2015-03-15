@@ -5,23 +5,24 @@
     "containers": {
         "mysql": {
             "enabled": true,
-            "dockerfilePath": "/vagrant/dockerfiles/mysql",
+            "dockerfilePath": "dockerfiles/mysql",
             "imageName": "bahek/mysql",
             "containerPort": 3306,
             "hostPort": 3306,
-            "runArgs": " -e MYSQL_PASS='XfDY7X2pNrwoU07Q0PNT' -v /vagrant/logs/mysql:/var/log/mysql "
+            "runArgs": " -v /vagrant/logs/mysql:/var/log/mysql ",
+            "defaultPass": "XfDY7X2pNrwoU07Q0PNT"
         },
         "mysqlProxy": {
             "enabled": true,
-            "dockerfilePath": "/vagrant/dockerfiles/mysql_proxy",
+            "dockerfilePath": "dockerfiles/mysql_proxy",
             "imageName": "bahek/mysql_proxy",
             "containerPort": 4040,
             "hostPort": 4040,
-            "runArgs": " -e MYSQL_DEFAULT_PORT=3306 -v /vagrant/logs/mysql_proxy:/var/log/mysql_proxy "
+            "runArgs": " -v /vagrant/logs/mysql_proxy:/var/log/mysql_proxy "
         },
         "memcached": {
             "enabled": true,
-            "dockerfilePath": "/vagrant/dockerfiles/memcached",
+            "dockerfilePath": "dockerfiles/memcached",
             "imageName": "bahek/memcached",
             "containerPort": 11211,
             "hostPort": 11211,
@@ -29,7 +30,7 @@
         },
         "apachePhpNode": {
             "enabled": true,
-            "dockerfilePath": "/vagrant/dockerfiles/apache_php_node",
+            "dockerfilePath": "dockerfiles/apache_php_node",
             "imageName": "bahek/apache_php_node",
             "containerPort": 80,
             "hostPort": 80,
@@ -37,7 +38,8 @@
             "runUserUid": 1000,
             "runUserGid": 1000,
             "runUserName": "developer",
-            "runArgs": " -e RUN_USER_UID=%d -e RUN_USER_GID=%d -e RUN_USER_NAME=%s -v /vagrant/app:/app -v /vagrant/logs/apache_php_node:/var/log/apache2 "
+            "runUserPass": "developer",
+            "runArgs": " -v /vagrant/app:/app -v /vagrant/logs/apache_php_node:/var/log/apache2 "
         }
     }
 }

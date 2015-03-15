@@ -1,10 +1,15 @@
 FROM tutum/memcached
 ENV TERM xterm
 
+EXPOSE %containers.memcached.containerPort%
+
 # update all
 RUN apt-get update
 ENV DEBIAN_FRONTEND noninteractive 
 RUN apt-get --assume-yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade
+
+# set timezone
+RUN echo '%timezone%' | tee /etc/timezone && dpkg-reconfigure tzdata
 
 # install support packages
 RUN apt-get --assume-yes install mc bash-completion wget

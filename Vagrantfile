@@ -43,9 +43,9 @@ Vagrant.configure(2) do |config|
     serverConfig["containers"].each do |container|
         if container[1]["enabled"]
             if container[0] == "apachePhpNode"
-                text += "alias enter-%s=\"docker exec -t -i apachePhpNode sudo -iu %s\"\n" % [container[0], container[1]["runUserName"]]
+                text += "alias enter-%s=\"docker exec -t -i %s sudo -iu %s\"\n" % [container[0], container[0], container[1]["runUserName"]]
             else
-                text += "alias enter-%s=\"docker exec -t -i apachePhpNode /bin/bash\"\n" % [container[0]]
+                text += "alias enter-%s=\"docker exec -t -i %s /bin/bash\"\n" % [container[0], container[0]]
             end
         end
     end
@@ -85,6 +85,9 @@ Vagrant.configure(2) do |config|
         if container[1]["enabled"]
             config.vm.provision "docker" do |d|
                 runArgs = " --name='%s' -p %d:%d " % [container[0], container[1]["hostPort"], container[1]["containerPort"]]
+                if container[0] == "mysql"
+                    runArgs += " -e MYSQL_PASS='%s' " % [container[1]["defaultPass"]]
+                end
                 runArgs += container[1]["runArgs"]
                 d.run container[1]["imageName"], args: runArgs, auto_assign_name: false, daemonize: true
             end

@@ -2,4 +2,5 @@
 /app/*
 /app/!index.php
 /.bash_aliases
+/dockerfiles/apache_php_node/site.conf
 Dockerfile

@@ -53,6 +53,20 @@ Vagrant.configure(2) do |config|
     createBashAliasesCmd = "cp /vagrant/.bash_aliases /home/vagrant/.bash_aliases"
     config.vm.provision "createBashAliases", type: "shell", inline: createBashAliasesCmd, run: "once"
 
+    # generate apache site.conf
+    if serverConfig["containers"]["apachePhpNode"]["enabled"]
+        text = File.open("#{File.dirname(__FILE__)}/dockerfiles/apache_php_node/site.conf.template", "r").read
+        placeholders = text.scan(/(?:%).+?(?:%)/).flatten.uniq
+        placeholders.each do |placeholder|
+            replacement = placeholder.gsub("%", "")
+            replacement = replacement.gsub(".", "\"][\"")
+            replacement = "serverConfig[\"#{replacement}\"]"
+            replacement = eval(replacement)
+            replacement = "#{replacement}"
+            text.gsub!(placeholder, replacement)
+        end
+        File.open("#{File.dirname(__FILE__)}/dockerfiles/apache_php_node/site.conf", "w").puts(text)
+    end
 
     # generating dockerfiles from templates
     serverConfig["containers"].each do |container|
@@ -87,6 +101,8 @@ Vagrant.configure(2) do |config|
                 runArgs = " --name='%s' -p %d:%d " % [container[0], container[1]["hostPort"], container[1]["containerPort"]]
                 if container[0] == "mysql"
                     runArgs += " -e MYSQL_PASS='%s' " % [container[1]["defaultPass"]]
+                elsif container[0] == "apachePhpNode"
+                    runArgs += " -p %d:%d " % [container[1]["hostSslPort"], container[1]["containerSslPort"]]
                 end
                 runArgs += container[1]["runArgs"]
                 d.run container[1]["imageName"], args: runArgs, auto_assign_name: false, daemonize: true

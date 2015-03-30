@@ -2,6 +2,7 @@ FROM tutum/apache-php
 ENV TERM xterm
 
 EXPOSE %containers.apachePhpNode.containerPort%
+EXPOSE %containers.apachePhpNode.containerSslPort%
 
 # update all
 RUN apt-get update
@@ -22,12 +23,26 @@ RUN sed -i 's/APACHE_RUN_GROUP=www-data/APACHE_RUN_GROUP=%containers.apachePhpNo
 # install support packages
 RUN apt-get --assume-yes install mc bash-completion wget git
 RUN echo "SELECTED_EDITOR=/usr/bin/mcedit" > /root/.selected_editor
+USER %containers.apachePhpNode.runUserName%
 RUN echo "SELECTED_EDITOR=/usr/bin/mcedit" > /home/%containers.apachePhpNode.runUserName%/.selected_editor
+USER root
 
 # install additional apache modules
 RUN apt-get --assume-yes install mcrypt php5-dev php5-intl php5-json php5-mcrypt php5-memcache php5-memcached php5-sasl php5-sqlite php5-xdebug php5-xmlrpc php5-xsl
 RUN a2enmod rewrite
 RUN php5enmod mcrypt
+
+# enable ssl, generate self-signed certificate
+RUN a2enmod ssl
+ENV SSL_PASSPHRASE ssl_passphrase
+RUN mkdir /etc/apache2/external
+RUN openssl genrsa -des3 -out /etc/apache2/external/%domain%.key -passout env:SSL_PASSPHRASE 2048
+RUN openssl req -new -batch -days 3650 -key /etc/apache2/external/%domain%.key -out /etc/apache2/external/%domain%.csr -passin env:SSL_PASSPHRASE -subj "/C=%containers.apachePhpNode.sslCertData.country%/ST=%containers.apachePhpNode.sslCertData.state%/O=%containers.apachePhpNode.sslCertData.company%/localityName=%containers.apachePhpNode.sslCertData.city%/commonName=%domain%/organizationalUnitName=%containers.apachePhpNode.sslCertData.department%/emailAddress=%adminEmail%"
+RUN cp /etc/apache2/external/%domain%.key /etc/apache2/external/%domain%.key.org
+RUN openssl rsa -in /etc/apache2/external/%domain%.key.org -out /etc/apache2/external/%domain%.key -passin env:SSL_PASSPHRASE
+RUN openssl x509 -req -days 3650 -in /etc/apache2/external/%domain%.csr -signkey /etc/apache2/external/%domain%.key -out /etc/apache2/external/%domain%.crt
+
+# install composer
 WORKDIR /root
 RUN curl -s https://getcomposer.org/installer | php
 RUN chmod 755 composer.phar
@@ -53,4 +68,5 @@ RUN echo "xdebug.remote_host=%developerIp%" >> /etc/php5/apache2/conf.d/21-xdebu
 # add site virtualhost
 COPY ./site.conf /etc/apache2/sites-available/site.conf
 RUN a2dissite 000-default
+RUN a2dissite default-ssl
 RUN a2ensite site

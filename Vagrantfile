@@ -42,7 +42,7 @@ Vagrant.configure(2) do |config|
     text = ""
     serverConfig["containers"].each do |container|
         if container[1]["enabled"]
-            if container[0] == "apachePhpNode"
+            if container[0] == "apachePhpNode" || container[0] == "node"
                 text += "alias enter-%s=\"docker exec -t -i %s sudo -iu %s\"\n" % [container[0], container[0], container[1]["runUserName"]]
             else
                 text += "alias enter-%s=\"docker exec -t -i %s /bin/bash\"\n" % [container[0], container[0]]

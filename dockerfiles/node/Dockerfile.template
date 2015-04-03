@@ -1,0 +1,45 @@
+FROM ubuntu:trusty
+ENV TERM xterm
+
+EXPOSE %containers.node.containerPort%
+EXPOSE %containers.node.containerSslPort%
+
+# update all
+RUN apt-get update
+ENV DEBIAN_FRONTEND noninteractive
+RUN apt-get --assume-yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade
+
+# set timezone
+RUN echo '%timezone%' | tee /etc/timezone && dpkg-reconfigure tzdata
+
+# add default user
+RUN groupadd --non-unique --gid %containers.node.runUserGid% %containers.node.runUserName%
+RUN useradd --non-unique --create-home --uid %containers.node.runUserUid% --gid %containers.node.runUserGid% --shell /bin/bash %containers.node.runUserName%
+RUN gpasswd -a %containers.node.runUserName% sudo
+RUN echo '%containers.node.runUserName%:%containers.node.runUserPass%' | chpasswd
+
+# install support packages
+RUN apt-get --assume-yes install mc bash-completion wget git
+RUN echo "SELECTED_EDITOR=/usr/bin/mcedit" > /root/.selected_editor
+USER %containers.node.runUserName%
+RUN echo "SELECTED_EDITOR=/usr/bin/mcedit" > /home/%containers.node.runUserName%/.selected_editor
+USER root
+
+# install nodejs
+RUN apt-get --assume-yes install curl
+RUN curl -sL https://deb.nodesource.com/setup | bash -
+RUN apt-get --assume-yes install nodejs
+RUN npm install -g gulp grunt-cli bower less nodemon
+
+# enable ssl, generate self-signed certificate
+ENV SSL_PASSPHRASE ssl_passphrase
+RUN openssl genrsa -des3 -out /etc/%domain%.key -passout env:SSL_PASSPHRASE 2048
+RUN openssl req -new -batch -days 3650 -key /etc/%domain%.key -out /etc/%domain%.csr -passin env:SSL_PASSPHRASE -subj "/C=%sslCertData.country%/ST=%sslCertData.state%/O=%sslCertData.company%/localityName=%sslCertData.city%/commonName=%domain%/organizationalUnitName=%sslCertData.department%/emailAddress=%adminEmail%"
+RUN cp /etc/%domain%.key /etc/%domain%.key.org
+RUN openssl rsa -in /etc/%domain%.key.org -out /etc/%domain%.key -passin env:SSL_PASSPHRASE
+RUN openssl x509 -req -days 3650 -in /etc/%domain%.csr -signkey /etc/%domain%.key -out /etc/%domain%.crt
+
+# configure
+ENV NODE_ENV %containers.node.nodeEnv%
+WORKDIR /app
+CMD ["/bin/bash"]

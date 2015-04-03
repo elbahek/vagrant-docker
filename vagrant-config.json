@@ -43,15 +43,31 @@
             "runUserGid": 1000,
             "runUserName": "developer",
             "runUserPass": "developer",
-            "runArgs": " -v /vagrant/app:/app -v /vagrant/logs/apache_php_node:/var/log/apache2 ",
-            "-comment-sslCertData": "Used to generate self-signed ssl certificate",
-            "sslCertData": {
-                "country": "UA",
-                "state": "Zaporozhye",
-                "company": "Company",
-                "city": "Zaporozhye",
-                "department": "Department of Defiance"
-            }
+            "runArgs": " -v /vagrant/app:/app -v /vagrant/logs/apache_php_node:/var/log/apache2 "
+        },
+        "node": {
+            "enabled": false,
+            "dockerfilePath": "dockerfiles/node",
+            "imageName": "bahek/node",
+            "containerPort": 8000,
+            "hostPort": 80,
+            "containerSslPort": 4433,
+            "hostSslPort": 443,
+            "-comment-runUserUid-runUserGid-runUserGid": "User to run apache service, uid/gid should be the same for apache user inside container, vagrant user and your desktop user. Until docker guys implement user mapping host<->container",
+            "runUserUid": 1000,
+            "runUserGid": 1000,
+            "runUserName": "developer",
+            "runUserPass": "developer",
+            "nodeEnv": "development",
+            "runArgs": " -v /vagrant/app:/app -t -i "
         }
+    },
+    "-comment-sslCertData": "Used to generate self-signed ssl certificate",
+    "sslCertData": {
+        "country": "UA",
+        "state": "Zaporozhye",
+        "company": "Company",
+        "city": "Zaporozhye",
+        "department": "Department of Defiance"
     }
 }

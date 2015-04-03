@@ -37,7 +37,7 @@ RUN a2enmod ssl
 ENV SSL_PASSPHRASE ssl_passphrase
 RUN mkdir /etc/apache2/external
 RUN openssl genrsa -des3 -out /etc/apache2/external/%domain%.key -passout env:SSL_PASSPHRASE 2048
-RUN openssl req -new -batch -days 3650 -key /etc/apache2/external/%domain%.key -out /etc/apache2/external/%domain%.csr -passin env:SSL_PASSPHRASE -subj "/C=%containers.apachePhpNode.sslCertData.country%/ST=%containers.apachePhpNode.sslCertData.state%/O=%containers.apachePhpNode.sslCertData.company%/localityName=%containers.apachePhpNode.sslCertData.city%/commonName=%domain%/organizationalUnitName=%containers.apachePhpNode.sslCertData.department%/emailAddress=%adminEmail%"
+RUN openssl req -new -batch -days 3650 -key /etc/apache2/external/%domain%.key -out /etc/apache2/external/%domain%.csr -passin env:SSL_PASSPHRASE -subj "/C=%sslCertData.country%/ST=%sslCertData.state%/O=%sslCertData.company%/localityName=%sslCertData.city%/commonName=%domain%/organizationalUnitName=%sslCertData.department%/emailAddress=%adminEmail%"
 RUN cp /etc/apache2/external/%domain%.key /etc/apache2/external/%domain%.key.org
 RUN openssl rsa -in /etc/apache2/external/%domain%.key.org -out /etc/apache2/external/%domain%.key -passin env:SSL_PASSPHRASE
 RUN openssl x509 -req -days 3650 -in /etc/apache2/external/%domain%.csr -signkey /etc/apache2/external/%domain%.key -out /etc/apache2/external/%domain%.crt

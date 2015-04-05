@@ -1,8 +1,9 @@
 FROM tutum/mysql
 ENV TERM xterm
 ENV MYSQL_DEFAULT_PASS %containers.mysql.defaultPass%
+ENV MYSQL_PASS %containers.mysql.defaultPass%
 
-EXPOSE %containers.mysql.containerPort%
+<<ports>>
 
 # update all
 RUN apt-get update

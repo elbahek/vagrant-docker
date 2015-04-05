@@ -9,57 +9,85 @@
             "enabled": true,
             "dockerfilePath": "dockerfiles/mysql",
             "imageName": "bahek/mysql",
-            "containerPort": 3306,
-            "hostPort": 3306,
             "runArgs": " -v /vagrant/logs/mysql:/var/log/mysql ",
-            "defaultPass": "XfDY7X2pNrwoU07Q0PNT"
+            "defaultPass": "XfDY7X2pNrwoU07Q0PNT",
+            "ports": {
+                "mysql": {
+                    "host": 3306,
+                    "container": 3306
+                }
+            }
         },
         "mysqlProxy": {
             "enabled": true,
             "dockerfilePath": "dockerfiles/mysql_proxy",
             "imageName": "bahek/mysql_proxy",
-            "containerPort": 4040,
-            "hostPort": 4040,
-            "runArgs": " -v /vagrant/logs/mysql_proxy:/var/log/mysql_proxy "
+            "runArgs": " -v /vagrant/logs/mysql_proxy:/var/log/mysql_proxy ",
+            "ports": {
+                "mysqlProxy": {
+                    "host": 4040,
+                    "container": 4040
+                }
+            }
         },
         "memcached": {
             "enabled": true,
             "dockerfilePath": "dockerfiles/memcached",
             "imageName": "bahek/memcached",
-            "containerPort": 11211,
-            "hostPort": 11211,
-            "runArgs": ""
+            "runArgs": "",
+            "ports": {
+                "memcached": {
+                    "host": 11211,
+                    "container": 11211
+                }
+            }
         },
         "apachePhpNode": {
             "enabled": true,
             "dockerfilePath": "dockerfiles/apache_php_node",
             "imageName": "bahek/apache_php_node",
-            "containerPort": 80,
-            "hostPort": 80,
-            "containerSslPort": 443,
-            "hostSslPort": 443,
             "-comment-runUserUid-runUserGid-runUserGid": "User to run apache service, uid/gid should be the same for apache user inside container, vagrant user and your desktop user. Until docker guys implement user mapping host<->container",
             "runUserUid": 1000,
             "runUserGid": 1000,
             "runUserName": "developer",
             "runUserPass": "developer",
-            "runArgs": " -v /vagrant/app:/app -v /vagrant/logs/apache_php_node:/var/log/apache2 "
+            "runArgs": " -v /vagrant/app:/app -v /vagrant/logs/apache_php_node:/var/log/apache2 ",
+            "ports": {
+                "http": {
+                    "host": 80,
+                    "container": 80
+                },
+                "https": {
+                    "host": 443,
+                    "container": 443
+                }
+            }
         },
         "node": {
             "enabled": false,
             "dockerfilePath": "dockerfiles/node",
             "imageName": "bahek/node",
-            "containerPort": 8000,
-            "hostPort": 80,
-            "containerSslPort": 4433,
-            "hostSslPort": 443,
             "-comment-runUserUid-runUserGid-runUserGid": "User to run apache service, uid/gid should be the same for apache user inside container, vagrant user and your desktop user. Until docker guys implement user mapping host<->container",
             "runUserUid": 1000,
             "runUserGid": 1000,
             "runUserName": "developer",
             "runUserPass": "developer",
             "nodeEnv": "development",
-            "runArgs": " -v /vagrant/app:/app -t -i "
+            "runArgs": " -v /vagrant/app:/app -t -i ",
+            "ports": {
+                "http": {
+                    "host": 80,
+                    "container": 8000
+                },
+                "https": {
+                    "host": 443,
+                    "container": 4430
+                },
+                "browserSync": {
+                    "host": 3000,
+                    "container": 3000
+                }
+            }
         }
     },
     "-comment-sslCertData": "Used to generate self-signed ssl certificate",

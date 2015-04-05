@@ -1,8 +1,7 @@
 FROM ubuntu:trusty
 ENV TERM xterm
 
-EXPOSE %containers.node.containerPort%
-EXPOSE %containers.node.containerSslPort%
+<<ports>>
 
 # update all
 RUN apt-get update

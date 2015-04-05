@@ -1,7 +1,7 @@
 FROM tutum/memcached
 ENV TERM xterm
 
-EXPOSE %containers.memcached.containerPort%
+<<ports>>
 
 # update all
 RUN apt-get update

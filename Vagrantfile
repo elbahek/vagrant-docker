@@ -81,6 +81,13 @@ Vagrant.configure(2) do |config|
                 replacement = "#{replacement}"
                 text.gsub!(placeholder, replacement)
             end
+
+            exposeString = ""
+            container[1]["ports"].each do |portData|
+                exposeString += "EXPOSE %d\n" % [portData[1]["container"]]
+            end
+            text.gsub!("<<ports>>", exposeString)
+
             File.open("#{File.dirname(__FILE__)}/#{container[1]["dockerfilePath"]}/Dockerfile", "w").puts(text)
         end
     end
@@ -98,11 +105,9 @@ Vagrant.configure(2) do |config|
     serverConfig["containers"].each do |container|
         if container[1]["enabled"]
             config.vm.provision "docker" do |d|
-                runArgs = " --name='%s' -p %d:%d " % [container[0], container[1]["hostPort"], container[1]["containerPort"]]
-                if container[0] == "mysql"
-                    runArgs += " -e MYSQL_PASS='%s' " % [container[1]["defaultPass"]]
-                elsif container[0] == "apachePhpNode"
-                    runArgs += " -p %d:%d " % [container[1]["hostSslPort"], container[1]["containerSslPort"]]
+                runArgs = " --name='#{container[0]}' "
+                container[1]["ports"].each do |portData|
+                    runArgs += " -p %d:%d " % [portData[1]["host"], portData[1]["container"]]
                 end
                 runArgs += container[1]["runArgs"]
                 d.run container[1]["imageName"], args: runArgs, auto_assign_name: false, daemonize: true

@@ -1,8 +1,7 @@
 FROM tutum/apache-php
 ENV TERM xterm
 
-EXPOSE %containers.apachePhpNode.containerPort%
-EXPOSE %containers.apachePhpNode.containerSslPort%
+<<ports>>
 
 # update all
 RUN apt-get update

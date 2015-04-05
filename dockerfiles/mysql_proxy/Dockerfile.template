@@ -1,9 +1,9 @@
 FROM ubuntu:trusty
 ENV TERM xterm
-ENV MYSQL_DEFAULT_PORT %containers.mysql.hostPort%
+ENV MYSQL_DEFAULT_PORT %containers.mysql.ports.mysql.host%
 ENV VAGRANT_IP %vagrantIp%
 
-EXPOSE %containers.mysqlProxy.containerPort%
+<<ports>>
 
 # update all
 RUN apt-get update

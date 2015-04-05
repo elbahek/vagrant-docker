@@ -1,4 +1,4 @@
-<VirtualHost *:443>
+<VirtualHost *:%containers.apachePhpNode.ports.https.container%>
 ServerAdmin %adminEmail%
 DocumentRoot "/var/www/html"
 ServerName %domain%
